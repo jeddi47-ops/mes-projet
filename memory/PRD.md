@@ -1,7 +1,7 @@
 # PRD — E-Commerce Backend Template
 
 **Date de création :** Février 2026
-**Étape actuelle :** Étape 1 — Architecture de base du backend
+**Étape actuelle :** Étape 3 — Panier, Commandes & Paiement Manuel ✅
 
 ---
 
@@ -13,150 +13,136 @@ Créer l'architecture de base d'un backend e-commerce réutilisable pouvant serv
 
 ## Architecture et stack technique
 
-| Composant       | Choix technique               |
-|-----------------|-------------------------------|
-| Framework       | FastAPI (Python 3.11+)        |
-| Base de données | PostgreSQL 16                 |
-| ORM             | SQLAlchemy 2.0 (async)        |
-| Migrations      | Alembic                       |
-| Auth            | JWT (30min) + Refresh (7j) + Google OAuth 2.0 |
-| Images          | Cloudinary (uploads signés)   |
-| Emails          | Resend                        |
-| Conteneurs      | Docker + Docker Compose       |
+| Composant       | Choix technique                                         |
+|-----------------|---------------------------------------------------------|
+| Framework       | FastAPI (Python 3.11+)                                  |
+| Base de données | PostgreSQL 16                                           |
+| ORM             | SQLAlchemy 2.0 (async)                                  |
+| Migrations      | Alembic                                                 |
+| Auth            | JWT (30min) + Refresh (7j) + Google OAuth 2.0           |
+| Images          | Cloudinary (uploads signés)                             |
+| Emails          | Resend (avec pièces jointes PDF)                        |
+| PDF             | fpdf2 (génération de factures en mémoire)               |
+| Conteneurs      | Docker + Docker Compose                                 |
 
 ---
 
-## Ce qui a été implémenté (Étape 1)
+## Ce qui a été implémenté
 
-### Structure du projet
-- `/app/ecommerce-backend/` — Projet standalone, séparé de l'app Emergent existante
-- Structure professionnelle : `app/`, `models/`, `schemas/`, `routes/`, `services/`, `auth/`, `utils/`
+### Étape 1 — Architecture de base ✅
+- Structure professionnelle FastAPI dans `/app/ecommerce-backend/`
+- Docker + PostgreSQL + Alembic + JWT + Google OAuth + Cloudinary + Resend
+- 14 modèles SQLAlchemy (UUID, TimestampMixin)
 
-### Fichiers de configuration
-- `requirements.txt` — 17 dépendances Python
-- `.env.example` — Template variables d'environnement avec placeholders
-- `Dockerfile` — Image Python 3.11-slim
-- `docker-compose.yml` — PostgreSQL 16 + Backend avec healthcheck
-- `alembic.ini` — Configuration Alembic
-- `README.md` — Documentation complète
+### Étape 2 — Gestion des produits et catalogue ✅
+- CRUD complet produits, options, images (Cloudinary), avis
+- Catalogue public paginé avec filtres (prix, catégorie, recherche) et tri
+- Sécurité admin/user via `require_admin` / `get_current_user`
 
-### Modèles de base de données (14 tables)
-Chaque table possède `id` (UUID), `created_at`, `updated_at`
+### Étape 3 — Panier, Commandes & Paiement Manuel ✅
 
-| Table              | Colonnes principales                                    |
-|--------------------|---------------------------------------------------------|
-| `users`            | email, hashed_password, first_name, last_name, is_active, is_verified, google_id, avatar_url, role_id |
-| `roles`            | name, description                                       |
-| `refresh_tokens`   | user_id, token_hash, expires_at, is_revoked, device_info|
-| `products`         | name, description, price, stock, category, slug, is_active |
-| `product_options`  | product_id, name, value, price_modifier, stock         |
-| `product_images`   | product_id, url, public_id, alt_text, is_primary, order|
-| `reviews`          | product_id, user_id, rating, comment, is_verified      |
-| `carts`            | user_id, session_id                                    |
-| `cart_items`       | cart_id, product_id, product_option_id, quantity, price|
-| `orders`           | user_id, status, total_amount, shipping_address, payment_status, payment_method |
-| `order_items`      | order_id, product_id, product_option_id, quantity, unit_price, product_name |
-| `messages`         | sender_id, receiver_id, content, is_read               |
-| `notifications`    | user_id, type, title, content, is_read, data           |
-| `page_views`       | path, user_id, session_id, ip_address, user_agent      |
+#### Modèles mis à jour
+- `OrderStatus` → `pending_payment`, `payment_discussion`, `paid`, `cancelled`
+- `PaymentStatus` supprimé (redondant avec le nouveau flux)
+- `Order` → ajout `invoice_url`, suppression `payment_status`
+- `OrderItem` → ajout `selected_options` (JSON snapshot des options choisies)
 
-### Authentification (routes `/api/auth/`)
-- `POST /register` — Inscription + émission tokens JWT
-- `POST /login` — Connexion email/password
-- `POST /refresh` — Rotation des tokens (révocation de l'ancien)
-- `POST /logout` — Révocation refresh token
-- `GET /me` — Profil utilisateur (JWT requis)
-- `GET /google` — Redirection Google OAuth
-- `GET /google/callback` — Callback OAuth → tokens JWT
+#### Nouveaux fichiers
+| Fichier                          | Description                                                  |
+|----------------------------------|--------------------------------------------------------------|
+| `app/services/pdf_service.py`    | Génération de factures PDF en mémoire avec fpdf2            |
+| `app/services/cart_service.py`   | Logique panier (ajout, MAJ, suppression)                     |
+| `app/services/order_service.py`  | Logique commandes (création, liste, détail, statut)          |
+| `app/routes/cart.py`             | 4 endpoints panier                                           |
+| `app/routes/orders.py`           | 4 endpoints commandes                                        |
+| `alembic/versions/001_initial_schema.py` | Migration initiale complète (14 tables)            |
 
-### Services
-- `auth_service.py` — Logique complète d'authentification
-- `cloudinary_service.py` — Génération signatures + suppression assets
-- `email_service.py` — send_welcome, send_verification, send_password_reset, send_order_confirmation
+#### Endpoints disponibles (Étape 3)
+
+| Méthode | Route                        | Auth         | Description                                  |
+|---------|------------------------------|--------------|----------------------------------------------|
+| GET     | `/api/cart`                  | User         | Voir son panier (créé auto si inexistant)    |
+| POST    | `/api/cart/add`              | User         | Ajouter un article (vérif. stock + actif)   |
+| PUT     | `/api/cart/update`           | User         | Modifier la quantité d'un article           |
+| DELETE  | `/api/cart/remove/{item_id}` | User         | Retirer un article du panier                |
+| POST    | `/api/orders`                | User         | Créer une commande depuis le panier          |
+| GET     | `/api/orders`                | User / Admin | Lister les commandes (filtrées par rôle)     |
+| GET     | `/api/orders/{id}`           | User / Admin | Détail d'une commande                        |
+| PUT     | `/api/orders/{id}/status`    | Admin        | Changer le statut (stock décrémenté à paid) |
+
+#### Règles métier implémentées
+- `POST /cart/add` : vérifie `product.is_active == True` + stock disponible
+- Prix capturé au moment de l'ajout (discount_price en priorité)
+- Même article (même product + option) → quantité incrémentée
+- `POST /orders` : snapshot product_name, unit_price, selected_options par article
+- Panier vidé automatiquement après création de commande
+- Stock décrémenté **uniquement** au passage du statut à `paid`
+- Facture PDF générée avec fpdf2 et envoyée en pièce jointe via Resend
+- Un utilisateur ne peut voir que ses propres commandes (admin voit tout)
+
+#### Contenu de la facture PDF
+- Numéro de commande (8 premiers caractères de l'UUID)
+- Date de création
+- Nom + téléphone du client
+- Adresse de livraison complète
+- Tableau : Produit, Quantité, Prix unitaire, Sous-total
+- Total en EUR
+- Message de bas de page
+
+---
+
+## Endpoints complets (tous préfixés `/api`)
 
 ### Auth
-- `jwt.py` — create_access_token (30min), create_refresh_token (7j), decode_token
-- `google_oauth.py` — Client Authlib (Starlette)
-- `dependencies.py` — Dépendance FastAPI `get_current_user`
+- `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`
+- `GET /auth/me`, `GET /auth/google`, `GET /auth/google/callback`
 
-### Migrations
-- `alembic/env.py` — Configuré avec import de tous les modèles
-- `alembic/script.py.mako` — Template de migration
+### Catalogue & Produits
+- `GET /catalog` — public, filtrable, paginable
+- `POST/GET/PUT/DELETE /products` et sous-ressources (options, images, reviews)
 
----
+### Panier
+- `GET/POST /cart`, `PUT /cart/update`, `DELETE /cart/remove/{id}`
 
-## Décisions d'architecture
-
-- **UUIDs** comme clés primaires (pas d'entiers auto-incrémentés)
-- **Refresh tokens en base** pour permettre la révocation et le multi-device
-- **Rotation des tokens** : nouveau refresh token à chaque renouvellement
-- **Upload Cloudinary signé** : la signature est générée côté backend, l'API secret ne quitte pas le serveur
-- **Emails async** : `asyncio.to_thread` pour ne pas bloquer la boucle événementielle FastAPI
-- **Alembic sync** : `SYNC_DATABASE_URL` séparé pour les migrations (psycopg2)
+### Commandes
+- `POST/GET /orders`, `GET /orders/{id}`, `PUT /orders/{id}/status`
 
 ---
 
-## Ce qui a été implémenté (Étape 2) — Gestion des produits et catalogue
+## Migration Alembic
 
-### Modification du modèle
-- `products.discount_price` (Float, nullable) — Prix remisé ajouté
+Fichier : `alembic/versions/001_initial_schema.py`
 
-### Fichiers créés/modifiés
-- `app/services/product_service.py` — Service complet produits
-- `app/routes/products.py` — 14 routes produits
-- `app/schemas/product.py` — Réécriture complète avec requête + réponse
-- `app/auth/dependencies.py` — Ajout `require_admin` + `selectinload(User.role)`
-- `app/main.py` — Routeur produits inclus
+Pour initialiser la base de données :
+```bash
+docker-compose up -d
+docker-compose exec backend alembic upgrade head
+```
 
-### Endpoints disponibles (préfixe /api)
+---
 
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| GET | `/catalog` | Public | Catalogue paginé, filtrable, triable |
-| POST | `/products` | Admin | Créer un produit |
-| GET | `/products` | Public | Lister les produits |
-| GET | `/products/{id}` | Public | Détail + avis + stats |
-| PUT | `/products/{id}` | Admin | Modifier un produit |
-| DELETE | `/products/{id}` | Admin | Supprimer + nettoyage Cloudinary |
-| POST | `/products/{id}/options` | Admin | Ajouter une option |
-| GET | `/products/{id}/options` | Public | Lister les options |
-| DELETE | `/options/{id}` | Admin | Supprimer une option |
-| GET | `/cloudinary/signature` | Admin | Signature upload Cloudinary |
-| POST | `/products/{id}/images` | Admin | Associer une image |
-| DELETE | `/images/{id}` | Admin | Supprimer image (BDD + Cloudinary) |
-| POST | `/products/{id}/reviews` | User connecté | Laisser un avis |
-| GET | `/products/{id}/reviews` | Public | Lister les avis |
+## Backlog priorisé
 
-### Fonctionnalités catalogue
-- Filtres : `min_price`, `max_price`, `category`, `search`
-- Tri : `newest`, `oldest`, `price_asc`, `price_desc`, `best_rated`
-- Pagination : `page`, `per_page` (max 100)
-- `average_rating` et `reviews_count` calculés en base par SQL
+### P0 — En cours
+- [x] Architecture backend (Étape 1)
+- [x] Gestion produits & catalogue (Étape 2)
+- [x] Panier, Commandes & Paiement Manuel (Étape 3)
 
-### Sécurité
-- `require_admin` → vérifie `user.role.name == "admin"`
-- `get_current_user` → charge le rôle avec `selectinload`
-- Un utilisateur = un seul avis par produit (contrainte DB + validation)
-- Cloudinary : nettoyage automatique lors de la suppression d'un produit/image
+### P1 — Prochaines étapes
+- [ ] Module chat/messages en temps réel (Étape 4)
+- [ ] Notifications push (Étape 4)
 
-
-
-### P0 — Étape 2 (Routes e-commerce)
-- [ ] CRUD Produits (`/api/products`)
-- [ ] Gestion Panier (`/api/cart`)
-- [ ] Gestion Commandes (`/api/orders`)
-- [ ] Upload images produits (Cloudinary)
-
-### P1 — Étape 3 (Communication)
-- [ ] Chat/Messages (`/api/messages`)
-- [ ] Notifications push (`/api/notifications`)
-- [ ] Webhooks paiement (Stripe)
-
-### P2 — Étape 4 (Analytics & Admin)
-- [ ] Analytics (`/api/analytics`)
+### P2 — Fonctionnalités avancées
 - [ ] Dashboard admin
-- [ ] Gestion des rôles (admin, vendeur)
-- [ ] Recherche et filtres produits
+- [ ] Analytics (page_views)
+- [ ] Webhooks Stripe (paiement automatique)
+- [ ] Gestion multi-rôles (vendeur, manager)
+
+### P3 — Améliorations futures
+- [ ] Multi-tenancy (adaptation pour chaque client)
+- [ ] Recherche avancée (Elasticsearch)
+- [ ] Cache Redis (sessions, catalogue)
+- [ ] Rate limiting
 
 ---
 
@@ -168,6 +154,5 @@ cd client-nom/
 cp .env.example .env
 # Remplir les credentials du client dans .env
 docker-compose up -d
-docker-compose exec backend alembic revision --autogenerate -m "init"
 docker-compose exec backend alembic upgrade head
 ```

@@ -6,6 +6,8 @@ from contextlib import asynccontextmanager
 from app.config import settings
 from app.routes import auth
 from app.routes import products
+from app.routes import cart
+from app.routes import orders
 
 
 @asynccontextmanager
@@ -38,6 +40,8 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 # Routes
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentification"])
 app.include_router(products.router, prefix="/api", tags=["Produits"])
+app.include_router(cart.router, prefix="/api", tags=["Panier"])
+app.include_router(orders.router, prefix="/api", tags=["Commandes"])
 
 
 @app.get("/", tags=["Health"])

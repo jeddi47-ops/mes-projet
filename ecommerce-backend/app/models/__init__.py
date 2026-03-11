@@ -4,7 +4,7 @@
 from app.models.user import User, Role, RefreshToken
 from app.models.product import Product, ProductOption, ProductImage, Review
 from app.models.cart import Cart, CartItem
-from app.models.order import Order, OrderItem, OrderStatus, PaymentStatus
+from app.models.order import Order, OrderItem, OrderStatus
 from app.models.message import Message
 from app.models.notification import Notification, NotificationType
 from app.models.analytics import PageView
@@ -22,7 +22,6 @@ __all__ = [
     "Order",
     "OrderItem",
     "OrderStatus",
-    "PaymentStatus",
     "Message",
     "Notification",
     "NotificationType",

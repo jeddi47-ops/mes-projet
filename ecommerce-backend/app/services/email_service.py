@@ -79,30 +79,61 @@ async def send_password_reset_email(to: str, reset_link: str) -> dict:
     return await send_email(to, "Réinitialisation de votre mot de passe", html)
 
 
-async def send_order_confirmation_email(to: str, order_id: str, total_amount: float) -> dict:
-    """Envoie un email de confirmation de commande."""
+async def send_invoice_email(
+    to: str,
+    customer_name: str,
+    order_id: str,
+    total_amount: float,
+    pdf_bytes: bytes,
+) -> dict:
+    """Envoie la confirmation de commande avec la facture PDF en pièce jointe."""
+    order_number = order_id[:8].upper()
     html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
         <h1 style="color: #2d3748;">Confirmation de commande</h1>
-        <p>Votre commande a été confirmée !</p>
+        <p>Bonjour {customer_name},</p>
+        <p>Votre commande a bien été enregistrée. Vous trouverez votre facture en pièce jointe.</p>
         <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
             <tr style="background-color: #f7fafc;">
                 <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;">
                     Numéro de commande
                 </td>
-                <td style="padding: 10px; border: 1px solid #e2e8f0;">{order_id[:8].upper()}</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">#{order_number}</td>
             </tr>
             <tr>
                 <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;">
                     Montant total
                 </td>
-                <td style="padding: 10px; border: 1px solid #e2e8f0;">{total_amount:.2f} €</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">{total_amount:.2f} EUR</td>
+            </tr>
+            <tr style="background-color: #f7fafc;">
+                <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;">
+                    Statut
+                </td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">En attente de paiement</td>
             </tr>
         </table>
-        <p>Merci pour votre commande !</p>
-        <p>Cordialement,<br/>L'équipe {settings.APP_NAME}</p>
+        <p>Notre équipe vous contactera prochainement pour finaliser le règlement.</p>
+        <p>Merci pour votre confiance !<br/>L'équipe {settings.APP_NAME}</p>
     </body>
     </html>
     """
-    return await send_email(to, f"Confirmation de votre commande #{order_id[:8].upper()}", html)
+    params = {
+        "from": settings.SENDER_EMAIL,
+        "to": [to],
+        "subject": f"Confirmation de votre commande #{order_number} — {settings.APP_NAME}",
+        "html": html,
+        "attachments": [
+            {
+                "filename": f"facture_{order_number}.pdf",
+                "content": list(pdf_bytes),
+            }
+        ],
+    }
+    try:
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        return {"status": "success", "email_id": result.get("id")}
+    except Exception as e:
+        logger.error(f"Erreur envoi facture commande #{order_number} à {to}: {str(e)}")
+        raise

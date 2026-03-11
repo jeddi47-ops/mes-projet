@@ -11,19 +11,10 @@ from app.models.base import TimestampMixin
 
 
 class OrderStatus(str, PyEnum):
-    PENDING = "pending"
-    CONFIRMED = "confirmed"
-    PROCESSING = "processing"
-    SHIPPED = "shipped"
-    DELIVERED = "delivered"
-    CANCELLED = "cancelled"
-
-
-class PaymentStatus(str, PyEnum):
-    PENDING = "pending"
+    PENDING_PAYMENT = "pending_payment"
+    PAYMENT_DISCUSSION = "payment_discussion"
     PAID = "paid"
-    FAILED = "failed"
-    REFUNDED = "refunded"
+    CANCELLED = "cancelled"
 
 
 class Order(Base, TimestampMixin):
@@ -34,18 +25,14 @@ class Order(Base, TimestampMixin):
     )
     status: Mapped[OrderStatus] = mapped_column(
         SAEnum(OrderStatus, name="order_status"),
-        default=OrderStatus.PENDING,
+        default=OrderStatus.PENDING_PAYMENT,
         nullable=False,
     )
     total_amount: Mapped[float] = mapped_column(Float, nullable=False)
     shipping_address: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    payment_status: Mapped[PaymentStatus] = mapped_column(
-        SAEnum(PaymentStatus, name="payment_status"),
-        default=PaymentStatus.PENDING,
-        nullable=False,
-    )
     payment_method: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    invoice_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Relations
     user: Mapped["User"] = relationship("User", back_populates="orders")
@@ -71,6 +58,7 @@ class OrderItem(Base, TimestampMixin):
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     unit_price: Mapped[float] = mapped_column(Float, nullable=False)
     product_name: Mapped[str] = mapped_column(String(255), nullable=False)  # Snapshot du nom
+    selected_options: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)  # Snapshot des options
 
     # Relations
     order: Mapped["Order"] = relationship("Order", back_populates="items")
