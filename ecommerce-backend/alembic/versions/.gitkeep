@@ -1,0 +1,3 @@
+# Dossier des migrations Alembic
+# Les fichiers de migration seront générés ici avec la commande :
+# alembic revision --autogenerate -m "description"

@@ -1,0 +1,48 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+from contextlib import asynccontextmanager
+
+from app.config import settings
+from app.routes import auth
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    yield
+    # Shutdown
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    description="Backend e-commerce réutilisable — Template professionnel FastAPI + PostgreSQL",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan,
+)
+
+# Middlewares
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.FRONTEND_URL],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+
+# Routes
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentification"])
+
+
+@app.get("/", tags=["Health"])
+async def root():
+    return {"message": f"Bienvenue sur {settings.APP_NAME}", "status": "running"}
+
+
+@app.get("/api/health", tags=["Health"])
+async def health_check():
+    return {"status": "ok", "app": settings.APP_NAME, "version": "1.0.0"}
