@@ -96,7 +96,50 @@ Chaque table possède `id` (UUID), `created_at`, `updated_at`
 
 ---
 
-## Backlog priorisé
+## Ce qui a été implémenté (Étape 2) — Gestion des produits et catalogue
+
+### Modification du modèle
+- `products.discount_price` (Float, nullable) — Prix remisé ajouté
+
+### Fichiers créés/modifiés
+- `app/services/product_service.py` — Service complet produits
+- `app/routes/products.py` — 14 routes produits
+- `app/schemas/product.py` — Réécriture complète avec requête + réponse
+- `app/auth/dependencies.py` — Ajout `require_admin` + `selectinload(User.role)`
+- `app/main.py` — Routeur produits inclus
+
+### Endpoints disponibles (préfixe /api)
+
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| GET | `/catalog` | Public | Catalogue paginé, filtrable, triable |
+| POST | `/products` | Admin | Créer un produit |
+| GET | `/products` | Public | Lister les produits |
+| GET | `/products/{id}` | Public | Détail + avis + stats |
+| PUT | `/products/{id}` | Admin | Modifier un produit |
+| DELETE | `/products/{id}` | Admin | Supprimer + nettoyage Cloudinary |
+| POST | `/products/{id}/options` | Admin | Ajouter une option |
+| GET | `/products/{id}/options` | Public | Lister les options |
+| DELETE | `/options/{id}` | Admin | Supprimer une option |
+| GET | `/cloudinary/signature` | Admin | Signature upload Cloudinary |
+| POST | `/products/{id}/images` | Admin | Associer une image |
+| DELETE | `/images/{id}` | Admin | Supprimer image (BDD + Cloudinary) |
+| POST | `/products/{id}/reviews` | User connecté | Laisser un avis |
+| GET | `/products/{id}/reviews` | Public | Lister les avis |
+
+### Fonctionnalités catalogue
+- Filtres : `min_price`, `max_price`, `category`, `search`
+- Tri : `newest`, `oldest`, `price_asc`, `price_desc`, `best_rated`
+- Pagination : `page`, `per_page` (max 100)
+- `average_rating` et `reviews_count` calculés en base par SQL
+
+### Sécurité
+- `require_admin` → vérifie `user.role.name == "admin"`
+- `get_current_user` → charge le rôle avec `selectinload`
+- Un utilisateur = un seul avis par produit (contrainte DB + validation)
+- Cloudinary : nettoyage automatique lors de la suppression d'un produit/image
+
+
 
 ### P0 — Étape 2 (Routes e-commerce)
 - [ ] CRUD Produits (`/api/products`)

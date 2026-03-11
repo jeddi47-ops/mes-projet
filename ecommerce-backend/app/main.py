@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from app.config import settings
 from app.routes import auth
+from app.routes import products
 
 
 @asynccontextmanager
@@ -36,6 +37,7 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # Routes
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentification"])
+app.include_router(products.router, prefix="/api", tags=["Produits"])
 
 
 @app.get("/", tags=["Health"])

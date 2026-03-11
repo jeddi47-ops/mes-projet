@@ -14,6 +14,7 @@ class Product(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     price: Mapped[float] = mapped_column(Float, nullable=False)
+    discount_price: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     stock: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
     slug: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
