@@ -1,7 +1,7 @@
 # PRD — E-Commerce Backend Template
 
 **Date de création :** Février 2026
-**Étape actuelle :** Étape 3 — Panier, Commandes & Paiement Manuel ✅
+**Étape actuelle :** Étapes 3, 4 & 5 — Complètes ✅
 
 ---
 
@@ -47,47 +47,77 @@ Créer l'architecture de base d'un backend e-commerce réutilisable pouvant serv
 - `Order` → ajout `invoice_url`, suppression `payment_status`
 - `OrderItem` → ajout `selected_options` (JSON snapshot des options choisies)
 
-#### Nouveaux fichiers
-| Fichier                          | Description                                                  |
-|----------------------------------|--------------------------------------------------------------|
-| `app/services/pdf_service.py`    | Génération de factures PDF en mémoire avec fpdf2            |
-| `app/services/cart_service.py`   | Logique panier (ajout, MAJ, suppression)                     |
-| `app/services/order_service.py`  | Logique commandes (création, liste, détail, statut)          |
-| `app/routes/cart.py`             | 4 endpoints panier                                           |
-| `app/routes/orders.py`           | 4 endpoints commandes                                        |
-| `alembic/versions/001_initial_schema.py` | Migration initiale complète (14 tables)            |
+#### Endpoints (4 panier + 5 commandes)
 
-#### Endpoints disponibles (Étape 3)
+| Méthode | Route                             | Auth         | Description                                   |
+|---------|-----------------------------------|--------------|-----------------------------------------------|
+| GET     | `/api/cart`                       | User         | Voir son panier                               |
+| POST    | `/api/cart/add`                   | User         | Ajouter un article                            |
+| PUT     | `/api/cart/update`                | User         | Modifier la quantité                          |
+| DELETE  | `/api/cart/remove/{item_id}`      | User         | Retirer un article                            |
+| POST    | `/api/orders`                     | User         | Créer une commande + PDF + email              |
+| GET     | `/api/orders`                     | User/Admin   | Lister les commandes                          |
+| GET     | `/api/orders/{id}`                | User/Admin   | Détail d'une commande                         |
+| PUT     | `/api/orders/{id}/status`         | Admin        | Changer le statut (stock décrémenté à `paid`) |
+| GET     | `/api/orders/{id}/invoice`        | Admin        | Régénérer/télécharger la facture PDF          |
 
-| Méthode | Route                        | Auth         | Description                                  |
-|---------|------------------------------|--------------|----------------------------------------------|
-| GET     | `/api/cart`                  | User         | Voir son panier (créé auto si inexistant)    |
-| POST    | `/api/cart/add`              | User         | Ajouter un article (vérif. stock + actif)   |
-| PUT     | `/api/cart/update`           | User         | Modifier la quantité d'un article           |
-| DELETE  | `/api/cart/remove/{item_id}` | User         | Retirer un article du panier                |
-| POST    | `/api/orders`                | User         | Créer une commande depuis le panier          |
-| GET     | `/api/orders`                | User / Admin | Lister les commandes (filtrées par rôle)     |
-| GET     | `/api/orders/{id}`           | User / Admin | Détail d'une commande                        |
-| PUT     | `/api/orders/{id}/status`    | Admin        | Changer le statut (stock décrémenté à paid) |
-
-#### Règles métier implémentées
-- `POST /cart/add` : vérifie `product.is_active == True` + stock disponible
+#### Règles métier
+- Vérification `product.is_active` + stock à l'ajout au panier
 - Prix capturé au moment de l'ajout (discount_price en priorité)
-- Même article (même product + option) → quantité incrémentée
-- `POST /orders` : snapshot product_name, unit_price, selected_options par article
+- Snapshot `product_name`, `unit_price`, `selected_options` par article de commande
 - Panier vidé automatiquement après création de commande
 - Stock décrémenté **uniquement** au passage du statut à `paid`
-- Facture PDF générée avec fpdf2 et envoyée en pièce jointe via Resend
-- Un utilisateur ne peut voir que ses propres commandes (admin voit tout)
+- Facture PDF (fpdf2) envoyée en pièce jointe Resend + notification admin créée
 
-#### Contenu de la facture PDF
-- Numéro de commande (8 premiers caractères de l'UUID)
-- Date de création
-- Nom + téléphone du client
-- Adresse de livraison complète
-- Tableau : Produit, Quantité, Prix unitaire, Sous-total
-- Total en EUR
-- Message de bas de page
+---
+
+### Étape 4 — Chat & Messages ✅
+
+#### Nouveaux fichiers
+| Fichier                             | Description                                          |
+|-------------------------------------|------------------------------------------------------|
+| `app/schemas/message.py`            | MessageSend, MessageResponse, ConversationSummary   |
+| `app/services/message_service.py`   | Envoi, conversation, liste + notification auto      |
+| `app/routes/messages.py`            | 3 endpoints                                          |
+
+#### Endpoints
+
+| Méthode | Route                                   | Auth  | Description                                      |
+|---------|-----------------------------------------|-------|--------------------------------------------------|
+| POST    | `/api/messages/send`                    | User  | Envoyer un message (user→admin auto, admin→user) |
+| GET     | `/api/messages/conversation/{user_id}` | User  | Conversation détaillée + marquage lu            |
+| GET     | `/api/messages`                         | User  | Liste des conversations (résumé)                |
+
+#### Règles
+- Utilisateur normal → envoie toujours à l'admin (auto-détection du premier admin)
+- Admin → `receiver_id` requis pour répondre
+- Marquage automatique des messages comme lus à la consultation
+- Notification créée pour le destinataire à chaque message
+
+---
+
+### Étape 5 — Dashboard Admin & Notifications ✅
+
+#### Nouveaux fichiers
+| Fichier                               | Description                                       |
+|---------------------------------------|---------------------------------------------------|
+| `app/schemas/admin.py`                | AdminStats                                        |
+| `app/services/notification_service.py`| create_notification, get_user_notifications       |
+| `app/services/admin_service.py`       | stats, all_orders, all_products, all_conversations|
+| `app/routes/admin.py`                 | 4 endpoints admin                                 |
+
+#### Endpoints
+
+| Méthode | Route                   | Auth  | Description                                           |
+|---------|-------------------------|-------|-------------------------------------------------------|
+| GET     | `/api/admin/stats`      | Admin | Statistiques : commandes, revenu, users, produits, aujourd'hui |
+| GET     | `/api/admin/orders`     | Admin | Toutes les commandes avec info client, paginées       |
+| GET     | `/api/admin/products`   | Admin | Tous les produits (y compris inactifs), paginés       |
+| GET     | `/api/admin/messages`   | Admin | Toutes les conversations avec les utilisateurs        |
+
+#### Notifications automatiques
+- Création de commande → notification `ORDER` pour l'admin
+- Envoi de message → notification `MESSAGE` pour le destinataire
 
 ---
 
@@ -123,26 +153,26 @@ docker-compose exec backend alembic upgrade head
 
 ## Backlog priorisé
 
-### P0 — En cours
+### P0 — Terminé ✅
 - [x] Architecture backend (Étape 1)
 - [x] Gestion produits & catalogue (Étape 2)
 - [x] Panier, Commandes & Paiement Manuel (Étape 3)
+- [x] Invoice download endpoint (Étape 3+)
+- [x] Chat / Messages (Étape 4)
+- [x] Dashboard Admin & Notifications (Étape 5)
 
 ### P1 — Prochaines étapes
-- [ ] Module chat/messages en temps réel (Étape 4)
-- [ ] Notifications push (Étape 4)
+- [ ] Authentification Google OAuth (compléter le scaffold)
+- [ ] Vérification email à l'inscription
 
 ### P2 — Fonctionnalités avancées
-- [ ] Dashboard admin
-- [ ] Analytics (page_views)
 - [ ] Webhooks Stripe (paiement automatique)
-- [ ] Gestion multi-rôles (vendeur, manager)
+- [ ] Analytics (page_views)
 
 ### P3 — Améliorations futures
 - [ ] Multi-tenancy (adaptation pour chaque client)
-- [ ] Recherche avancée (Elasticsearch)
-- [ ] Cache Redis (sessions, catalogue)
-- [ ] Rate limiting
+- [ ] Cache Redis + Rate limiting
+- [ ] WebSocket pour le chat en temps réel
 
 ---
 

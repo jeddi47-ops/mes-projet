@@ -8,6 +8,8 @@ from app.routes import auth
 from app.routes import products
 from app.routes import cart
 from app.routes import orders
+from app.routes import messages
+from app.routes import admin
 
 
 @asynccontextmanager
@@ -42,6 +44,8 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentification"])
 app.include_router(products.router, prefix="/api", tags=["Produits"])
 app.include_router(cart.router, prefix="/api", tags=["Panier"])
 app.include_router(orders.router, prefix="/api", tags=["Commandes"])
+app.include_router(messages.router, prefix="/api", tags=["Messages"])
+app.include_router(admin.router, prefix="/api", tags=["Admin"])
 
 
 @app.get("/", tags=["Health"])

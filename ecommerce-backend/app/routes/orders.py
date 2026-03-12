@@ -1,14 +1,21 @@
 import uuid
+import io
 from typing import List
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.auth.dependencies import get_current_user, require_admin
 from app.models.user import User
+from app.models.order import Order
 from app.schemas.order import OrderCreate, OrderResponse, OrderStatusUpdate
 from app.services import order_service
+from app.services.pdf_service import generate_invoice_pdf
+from app.config import settings
 
 router = APIRouter()
 
@@ -84,3 +91,67 @@ async def update_order_status(
     Le stock n'est décrémenté qu'au passage vers `paid`.
     """
     return await order_service.update_status(order_id, data, db)
+
+
+@router.get("/orders/{order_id}/invoice", tags=["Commandes"])
+async def download_invoice(
+    order_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """
+    Régénère et télécharge la facture PDF d'une commande. **Réservé aux administrateurs.**
+
+    Utile pour réenvoyer manuellement une facture ou en cas de perte par le client.
+    Retourne un fichier PDF en téléchargement direct.
+    """
+    result = await db.execute(
+        select(Order)
+        .options(selectinload(Order.items), selectinload(Order.user))
+        .where(Order.id == order_id)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+
+    addr = order.shipping_address or {}
+    customer_name = addr.get("full_name") or (
+        f"{order.user.first_name or ''} {order.user.last_name or ''}".strip()
+        if order.user else "Client"
+    ) or (order.user.email if order.user else "Client")
+
+    invoice_items = [
+        {
+            "name": oi.product_name,
+            "option": (
+                f"{oi.selected_options['name']}: {oi.selected_options['value']}"
+                if oi.selected_options else None
+            ),
+            "quantity": oi.quantity,
+            "unit_price": oi.unit_price,
+            "subtotal": oi.unit_price * oi.quantity,
+        }
+        for oi in order.items
+    ]
+
+    pdf_bytes = generate_invoice_pdf(
+        order_id=str(order.id),
+        order_date=order.created_at,
+        customer_name=customer_name,
+        customer_phone=addr.get("phone"),
+        shipping_address=addr,
+        items=invoice_items,
+        total_amount=order.total_amount,
+        app_name=settings.APP_NAME,
+    )
+
+    order_number = str(order.id)[:8].upper()
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="facture_{order_number}.pdf"',
+            "Content-Length": str(len(pdf_bytes)),
+        },
+    )

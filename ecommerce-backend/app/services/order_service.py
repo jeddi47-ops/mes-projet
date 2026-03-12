@@ -163,6 +163,26 @@ async def create_order(
             logger.error(f"Erreur envoi email facture commande {order.id}: {e}")
             # On ne bloque pas la création de commande si l'email échoue
 
+    # 10. Notification pour l'admin
+    try:
+        from app.services.notification_service import get_first_admin_id, create_notification
+        from app.models.notification import NotificationType
+        admin_id = await get_first_admin_id(db)
+        if admin_id:
+            order_number = str(order.id)[:8].upper()
+            customer_name_str = addr.full_name
+            await create_notification(
+                user_id=admin_id,
+                type=NotificationType.ORDER,
+                title=f"Nouvelle commande #{order_number}",
+                content=f"Commande de {customer_name_str} — Total : {order.total_amount:.2f} EUR",
+                data={"order_id": str(order.id), "total": order.total_amount},
+                db=db,
+            )
+            await db.commit()
+    except Exception as e:
+        logger.error(f"Erreur création notification commande {order.id}: {e}")
+
     return order
 
 
