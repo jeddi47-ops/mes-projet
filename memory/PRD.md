@@ -1,7 +1,7 @@
 # PRD — E-Commerce Backend Template
 
 **Date de création :** Février 2026
-**Étape actuelle :** Étapes 3, 4 & 5 — Complètes ✅
+**Étape actuelle :** Étapes 1 à 5 + Frontend Admin ✅
 
 ---
 
@@ -156,10 +156,9 @@ docker-compose exec backend alembic upgrade head
 ### P0 — Terminé ✅
 - [x] Architecture backend (Étape 1)
 - [x] Gestion produits & catalogue (Étape 2)
-- [x] Panier, Commandes & Paiement Manuel (Étape 3)
-- [x] Invoice download endpoint (Étape 3+)
-- [x] Chat / Messages (Étape 4)
-- [x] Dashboard Admin & Notifications (Étape 5)
+- [x] Panier, Commandes & Paiement Manuel + Invoice (Étape 3)
+- [x] Chat / Messages + Notifications (Étapes 4 & 5)
+- [x] Frontend Admin Dashboard — Next.js (8 pages complètes)
 
 ### P1 — Prochaines étapes
 - [ ] Authentification Google OAuth (compléter le scaffold)
