@@ -1,0 +1,146 @@
+{
+  "project_name": "Premium E-commerce Admin",
+  "design_philosophy": {
+    "theme": "Premium SaaS (Stripe/Linear inspired)",
+    "mode": "light",
+    "core_principles": [
+      "Content Density: High but breathable. Use whitespace to separate groups, not borders.",
+      "Visual Hierarchy: Bold numbers, subtle labels.",
+      "Micro-Interactions: Soft hover lifts, smooth transitions.",
+      "Depth: Use shadows and layering (z-index) rather than flat borders."
+    ]
+  },
+  "typography": {
+    "font_family_primary": "Inter, sans-serif",
+    "font_family_secondary": "Manrope, sans-serif",
+    "headings": {
+      "h1": "text-3xl font-bold tracking-tight text-slate-900",
+      "h2": "text-2xl font-semibold tracking-tight text-slate-900",
+      "h3": "text-xl font-medium text-slate-900",
+      "subheading": "text-sm font-medium text-slate-500 uppercase tracking-wider"
+    },
+    "body": {
+      "base": "text-sm text-slate-600 leading-relaxed",
+      "small": "text-xs text-slate-500",
+      "large": "text-base text-slate-700"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#0f172a",
+        "foreground": "#f8fafc",
+        "hover": "#1e293b"
+      },
+      "secondary": {
+        "DEFAULT": "#f1f5f9",
+        "foreground": "#0f172a",
+        "hover": "#e2e8f0"
+      },
+      "accent": {
+        "DEFAULT": "#6366f1",
+        "foreground": "#ffffff",
+        "hover": "#4f46e5"
+      },
+      "background": "#f8fafc",
+      "surface": "#ffffff",
+      "border": "#e2e8f0",
+      "muted": "#94a3b8",
+      "sidebar": {
+        "bg": "#0f172a",
+        "fg": "#94a3b8",
+        "active_bg": "rgba(255, 255, 255, 0.1)",
+        "active_fg": "#ffffff",
+        "border": "#1e293b"
+      },
+      "success": "#10b981",
+      "warning": "#f59e0b",
+      "danger": "#ef4444"
+    }
+  },
+  "layout_structure": {
+    "root": "flex h-screen bg-slate-50 overflow-hidden",
+    "sidebar": "w-64 flex-shrink-0 h-full bg-slate-900 border-r border-slate-800 flex flex-col transition-all duration-300",
+    "main_content": "flex-1 flex flex-col h-full overflow-hidden relative",
+    "header": "h-16 flex-shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 z-10 sticky top-0",
+    "page_container": "flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth"
+  },
+  "components": {
+    "Card": {
+      "className": "bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+    },
+    "Button": {
+      "variants": {
+        "primary": "bg-slate-900 text-white hover:bg-slate-800 shadow-sm rounded-lg px-4 py-2 font-medium transition-all active:scale-95",
+        "secondary": "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-sm rounded-lg px-4 py-2 font-medium transition-all active:scale-95",
+        "ghost": "text-slate-600 hover:bg-slate-100 hover:text-slate-900 rounded-lg px-3 py-2 transition-colors",
+        "danger": "bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 rounded-lg px-4 py-2 font-medium"
+      }
+    },
+    "Badge": {
+      "base": "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ring-1 ring-inset",
+      "variants": {
+        "success": "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+        "warning": "bg-amber-50 text-amber-700 ring-amber-600/20",
+        "error": "bg-red-50 text-red-700 ring-red-600/20",
+        "neutral": "bg-slate-50 text-slate-600 ring-slate-500/10",
+        "info": "bg-blue-50 text-blue-700 ring-blue-700/10"
+      }
+    },
+    "Table": {
+      "wrapper": "w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm",
+      "header": "bg-slate-50 border-b border-slate-200",
+      "header_cell": "px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider",
+      "row": "hover:bg-slate-50/50 transition-colors border-b border-slate-100 last:border-0",
+      "cell": "px-6 py-4 whitespace-nowrap text-sm text-slate-700"
+    }
+  },
+  "charts": {
+    "library": "recharts",
+    "theme": {
+      "colors": ["#0f172a", "#6366f1", "#10b981", "#f59e0b", "#ef4444"],
+      "grid": "#e2e8f0",
+      "tooltip": {
+        "bg": "#ffffff",
+        "border": "#e2e8f0",
+        "text": "#0f172a"
+      }
+    }
+  },
+  "assets": {
+    "images": {
+      "products": [
+        "https://images.unsplash.com/photo-1727755868079-d7a2b287cb48?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBwcm9kdWN0JTIwcGhvdG9ncmFwaHklMjBtaW5pbWFsfGVufDB8fHx8MTc3MzM5MTc3Nnww&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1727755708630-79c8384e216a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBwcm9kdWN0JTIwcGhvdG9ncmFwaHklMjBtaW5pbWFsfGVufDB8fHx8MTc3MzM5MTc3Nnww&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1530404124886-4861adb62ac7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBwcm9kdWN0JTIwcGhvdG9ncmFwaHklMjBtaW5pbWFsfGVufDB8fHx8MTc3MzM5MTc3Nnww&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1727755868081-c25d2b427ce3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBwcm9kdWN0JTIwcGhvdG9ncmFwaHklMjBtaW5pbWFsfGVufDB8fHx8MTc3MzM5MTc3Nnww&ixlib=rb-4.1.0&q=85"
+      ],
+      "avatars": [
+        "https://images.unsplash.com/photo-1753453044684-e18b4ba82737?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODR8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjB1c2VyJTIwcG9ydHJhaXQlMjBkaXZlcnNpdHl8ZW58MHx8fHwxNzczMzkxNzc3fDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1618587068859-d9903ef41bb2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODR8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjB1c2VyJTIwcG9ydHJhaXQlMjBkaXZlcnNpdHl8ZW58MHx8fHwxNzczMzkxNzc3fDA&ixlib=rb-4.1.0&q=85"
+      ],
+      "logo_placeholder": "https://via.placeholder.com/40?text=Shop"
+    },
+    "icons": "lucide-react"
+  },
+  "implementation_checklist": [
+    "Install missing dependencies: `yarn add framer-motion zustand @tanstack/react-query`",
+    "Configure Tailwind theme to match 'colors' section",
+    "Create a 'Layout' component that wraps the Sidebar, Header, and Page Content",
+    "Ensure all components are responsive (hidden sidebar on mobile with toggle)",
+    "Use 'recharts' for Analytics and Dashboard charts",
+    "Use 'sonner' for notifications",
+    "Implement 'Sidebar' with Links to: Dashboard, Products, Orders, Messages, Clients, Promotions, Analytics, Settings",
+    "Products Page must have a Data Table with Image, Name, Price, Status, Actions",
+    "Dashboard must have Stats Cards + Sales Area Chart + Recent Orders"
+  ],
+  "universal_guidelines": [
+    "Do not use gradients for backgrounds, use solid slate-50/100 or white",
+    "Use borders sparingly; use shadows for depth",
+    "All interactive elements must have a hover state",
+    "Transitions should be 'duration-200 ease-in-out'",
+    "Add 'data-testid' to all buttons, inputs, and links",
+    "Use 'lucide-react' icons with size 18 or 20 for UI elements",
+    "Maintain a 'card-less' look for the dashboard grid where appropriate, or use very subtle white cards"
+  ]
+}
