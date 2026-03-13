@@ -191,7 +191,7 @@ async def list_orders(
     db: AsyncSession,
     page: int = 1,
     per_page: int = 20,
-) -> dict:
+) -> List[Order]:
     """
     Liste les commandes :
     - Utilisateur connecté → ses propres commandes uniquement.

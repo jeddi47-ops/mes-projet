@@ -29,7 +29,8 @@ export default function LoginPage() {
       toast.success(`Bienvenue, ${user.first_name || user.email} !`);
       router.push('/');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Email ou mot de passe incorrect';
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      const message = axiosErr?.response?.data?.detail || 'Email ou mot de passe incorrect';
       toast.error(message);
     } finally {
       setLoading(false);
