@@ -8,9 +8,10 @@ from sqlalchemy.orm import selectinload
 
 from app.models.order import Order, OrderStatus
 from app.models.product import Product
-from app.models.user import User
+from app.models.user import User, Role
 from app.models.message import Message
 from app.schemas.admin import AdminStats
+from app.schemas.user import AdminUserResponse
 
 logger = logging.getLogger(__name__)
 
@@ -106,3 +107,83 @@ async def get_all_conversations(db: AsyncSession) -> list:
 
     # Utiliser le service de messages pour obtenir toutes les conversations de l'admin
     return await get_conversations(admin_id, db)
+
+
+async def get_all_users(
+    db: AsyncSession,
+    page: int = 1,
+    per_page: int = 50,
+) -> List[AdminUserResponse]:
+    """
+    Retourne la liste des utilisateurs (hors admins) avec leur nombre de commandes,
+    leur téléphone et leur pays extraits de la dernière commande passée.
+    Triés par date d'inscription, du plus récent au plus ancien.
+    """
+    # 1. Récupérer tous les utilisateurs non-admins, actifs
+    result = await db.execute(
+        select(User)
+        .options(selectinload(User.role))
+        .join(Role, User.role_id == Role.id, isouter=True)
+        .where(
+            User.is_active == True,  # noqa: E712
+            (Role.name != "admin") | (User.role_id == None),  # noqa: E711
+        )
+        .order_by(desc(User.created_at))
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+    )
+    users = list(result.scalars().all())
+
+    if not users:
+        return []
+
+    user_ids = [u.id for u in users]
+
+    # 2. Compter les commandes par utilisateur
+    counts_result = await db.execute(
+        select(Order.user_id, func.count(Order.id).label("cnt"))
+        .where(Order.user_id.in_(user_ids))
+        .group_by(Order.user_id)
+    )
+    order_counts: dict = {row.user_id: row.cnt for row in counts_result}
+
+    # 3. Récupérer la dernière commande par utilisateur (pour phone et country)
+    latest_result = await db.execute(
+        select(Order)
+        .where(Order.user_id.in_(user_ids))
+        .order_by(desc(Order.created_at))
+    )
+    all_orders = list(latest_result.scalars().all())
+
+    # Garder uniquement la commande la plus récente par user
+    latest_order: dict = {}
+    for order in all_orders:
+        if order.user_id not in latest_order:
+            latest_order[order.user_id] = order
+
+    # 4. Construire la réponse
+    response = []
+    for user in users:
+        name_parts = [user.first_name or "", user.last_name or ""]
+        name = " ".join(p for p in name_parts if p).strip() or user.email
+
+        phone = None
+        country = None
+        last_order = latest_order.get(user.id)
+        if last_order and isinstance(last_order.shipping_address, dict):
+            phone = last_order.shipping_address.get("phone")
+            country = last_order.shipping_address.get("country")
+
+        response.append(
+            AdminUserResponse(
+                id=user.id,
+                name=name,
+                email=user.email,
+                phone=phone,
+                country=country,
+                created_at=user.created_at,
+                orders_count=order_counts.get(user.id, 0),
+            )
+        )
+
+    return response

@@ -26,6 +26,18 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class AdminUserResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    email: str
+    phone: Optional[str] = None
+    country: Optional[str] = None
+    created_at: datetime
+    orders_count: int = 0
+
+    model_config = {"from_attributes": True}
+
+
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None

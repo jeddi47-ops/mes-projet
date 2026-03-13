@@ -134,6 +134,17 @@ export interface AdminStats {
   orders_today: number;
 }
 
+// Admin User
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  country?: string;
+  created_at: string;
+  orders_count: number;
+}
+
 // Pagination
 export interface PaginationParams {
   page?: number;

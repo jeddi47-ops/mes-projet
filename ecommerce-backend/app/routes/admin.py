@@ -10,6 +10,7 @@ from app.schemas.admin import AdminStats
 from app.schemas.order import OrderResponse
 from app.schemas.product import ProductResponse
 from app.schemas.message import ConversationSummary
+from app.schemas.user import AdminUserResponse
 from app.services import admin_service
 
 router = APIRouter()
@@ -71,3 +72,24 @@ async def get_all_messages(
     Triées par date du dernier message (plus récent en tête).
     """
     return await admin_service.get_all_conversations(db)
+
+
+@router.get("/admin/users", response_model=List[AdminUserResponse], tags=["Admin"])
+async def get_all_users(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """
+    Liste tous les utilisateurs (hors admins). **Réservé aux administrateurs.**
+
+    Retourne pour chaque client :
+    - `id`, `name`, `email` : identité
+    - `phone`, `country` : extraits de la dernière commande
+    - `created_at` : date d'inscription
+    - `orders_count` : nombre total de commandes passées
+
+    Trié du plus récent inscrit au plus ancien.
+    """
+    return await admin_service.get_all_users(db, page=page, per_page=per_page)
