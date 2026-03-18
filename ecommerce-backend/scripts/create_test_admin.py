@@ -33,7 +33,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ── Identifiants du compte de test ──────────────────────────────────────────
 TEST_EMAIL    = "Jedidiadinga47@gmail.com"
-TEST_PASSWORD = "12345678"
+TEST_PASSWORD = "123456"
 TEST_FIRST    = "Admin"
 TEST_LAST     = "Test"
 # ─────────────────────────────────────────────────────────────────────────────

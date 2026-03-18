@@ -10,7 +10,7 @@ from app.schemas.auth import RegisterRequest, LoginRequest
 from app.auth.jwt import create_access_token, create_refresh_token, decode_token, get_token_expiry
 from app.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=False)
 
 
 def hash_password(password: str) -> str:
