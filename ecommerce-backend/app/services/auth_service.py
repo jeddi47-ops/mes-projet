@@ -28,6 +28,9 @@ def hash_token(token: str) -> str:
 
 async def register_user(data: RegisterRequest, db: AsyncSession) -> dict:
     """Inscrit un nouvel utilisateur et retourne les tokens JWT."""
+    password = str(data.password)
+    print(f"[DEBUG] register_user: password length = {len(password)}")
+
     result = await db.execute(select(User).where(User.email == data.email))
     if result.scalar_one_or_none():
         raise HTTPException(
@@ -37,7 +40,7 @@ async def register_user(data: RegisterRequest, db: AsyncSession) -> dict:
 
     user = User(
         email=data.email,
-        hashed_password=hash_password(data.password),
+        hashed_password=hash_password(password),
         first_name=data.first_name,
         last_name=data.last_name,
     )
