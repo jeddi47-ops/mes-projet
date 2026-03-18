@@ -4,6 +4,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 
 from app.config import settings
+from app.database import engine, Base
+import app.models  # noqa: F401 — enregistre tous les modèles dans Base.metadata
 from app.routes import auth
 from app.routes import products
 from app.routes import cart
@@ -14,7 +16,9 @@ from app.routes import admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    # Startup — crée les tables si elles n'existent pas encore
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
     # Shutdown
 
