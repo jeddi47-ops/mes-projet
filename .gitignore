@@ -104,3 +104,7 @@ admin-dashboard/node_modules/@next/swc-linux-arm64-musl/next-swc.linux-arm64-mus
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
