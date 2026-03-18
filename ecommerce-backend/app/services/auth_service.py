@@ -28,6 +28,9 @@ def hash_token(token: str) -> str:
 
 async def register_user(data: RegisterRequest, db: AsyncSession) -> dict:
     """Inscrit un nouvel utilisateur et retourne les tokens JWT."""
+    print(type(data.password), data.password)
+    if not isinstance(data.password, str):
+        raise ValueError("Password must be a string")
     password = str(data.password)
     print(f"[DEBUG] register_user: password length = {len(password)}")
 
