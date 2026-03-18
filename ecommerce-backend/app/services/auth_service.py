@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from passlib.context import CryptContext
 from datetime import datetime, timezone
 import hashlib
+import bcrypt as _bcrypt
 
 from app.models.user import User, RefreshToken
 from app.schemas.auth import RegisterRequest, LoginRequest
@@ -14,11 +15,22 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__trunca
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    """Hash le mot de passe avec bcrypt directement (contourne les problèmes passlib)."""
+    password_bytes = password.encode("utf-8")
+    hashed = _bcrypt.hashpw(password_bytes, _bcrypt.gensalt(rounds=12))
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    """Vérifie le mot de passe avec bcrypt directement."""
+    try:
+        return _bcrypt.checkpw(
+            plain_password.encode("utf-8"),
+            hashed_password.encode("utf-8"),
+        )
+    except Exception as e:
+        print(f"[DEBUG] verify_password exception: {e}")
+        return False
 
 
 def hash_token(token: str) -> str:
@@ -72,8 +84,12 @@ async def register_user(data: RegisterRequest, db: AsyncSession) -> dict:
 
 async def authenticate_user(data: LoginRequest, db: AsyncSession) -> dict:
     """Authentifie un utilisateur avec email/mot de passe."""
+    print(f"[DEBUG] authenticate_user: email={data.email}, password_length={len(str(data.password))}")
+
     result = await db.execute(select(User).where(User.email == data.email))
     user = result.scalar_one_or_none()
+
+    print(f"[DEBUG] authenticate_user: user_found={user is not None}, has_hash={bool(user.hashed_password) if user else False}")
 
     if not user or not user.hashed_password or not verify_password(data.password, user.hashed_password):
         raise HTTPException(
