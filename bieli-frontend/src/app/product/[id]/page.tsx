@@ -29,6 +29,22 @@ export default function ProductPage() {
 
   useEffect(() => {
     setLoading(true);
+
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isMockId = !UUID_REGEX.test(id);
+
+    if (isMockId) {
+      // Mock product (p1–p9): skip API call entirely, no 422
+      const mock = MOCK_PRODUCTS.find((p) => p.id === id) ?? null;
+      setProduct(mock);
+      if (mock) {
+        setRelated(MOCK_PRODUCTS.filter((p) => p.id !== id).slice(0, 4));
+      }
+      setLoading(false);
+      return;
+    }
+
+    // Real UUID: call the live API
     api.get(`/api/products/${id}`)
       .then((res) => {
         setProduct(res.data);
@@ -39,9 +55,7 @@ export default function ProductPage() {
         setRelated(items.filter((p: Product) => p.id !== id).slice(0, 4));
       })
       .catch(() => {
-        const mock = MOCK_PRODUCTS.find((p) => p.id === id) || MOCK_PRODUCTS[0];
-        setProduct(mock);
-        setRelated(MOCK_PRODUCTS.filter((p) => p.id !== mock.id).slice(0, 4));
+        setProduct(null); // Show 404 UI
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -71,7 +85,23 @@ export default function ProductPage() {
     );
   }
 
-  if (!product) return null;
+  if (!product) return (
+    <>
+      <Header />
+      <main className="pt-[56px] min-h-screen flex items-center justify-center bg-bieli-bg">
+        <div className="text-center max-w-sm px-4" data-testid="product-not-found">
+          <p className="text-xs tracking-widest uppercase text-bieli-muted mb-3">Erreur 404</p>
+          <h1 className="font-playfair text-3xl font-medium mb-3">Produit introuvable</h1>
+          <p className="text-sm text-bieli-gray mb-8">
+            Ce produit n'existe pas ou a été supprimé.
+          </p>
+          <Link href="/" className="inline-block px-6 py-2.5 bg-bieli-black text-white text-sm hover:bg-bieli-gray transition-colors">
+            Retour à la boutique
+          </Link>
+        </div>
+      </main>
+    </>
+  );
 
   const images = product.images?.length ? product.images : [{ id: 'ph', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80' }];
   const discount = product.original_price
