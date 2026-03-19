@@ -24,7 +24,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function AccountPage() {
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, logout, isLoading } = useAuthStore();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,7 @@ export default function AccountPage() {
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || isLoading) return; // Wait for auth hydration to finish
     if (!isAuthenticated) {
       router.replace('/login');
       return;
@@ -44,9 +44,9 @@ export default function AccountPage() {
       .then((res) => setOrders(Array.isArray(res.data) ? res.data : []))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
-  }, [mounted, isAuthenticated]);
+  }, [mounted, isAuthenticated, isLoading]);
 
-  if (!mounted || !isAuthenticated) {
+  if (!mounted || isLoading) {
     return (
       <>
         <Header />
@@ -70,7 +70,7 @@ export default function AccountPage() {
   const displayName =
     user?.first_name && user?.last_name
       ? `${user.first_name} ${user.last_name}`
-      : user?.email ?? 'Mon profil';
+      : null; // null → show only email as subtitle, not as title
 
   return (
     <>
@@ -93,7 +93,7 @@ export default function AccountPage() {
                   {initials}
                 </div>
 
-                <h2 className="font-medium text-bieli-black text-sm">{displayName}</h2>
+                <h2 className="font-medium text-bieli-black text-sm">{displayName ?? 'Mon compte'}</h2>
                 <p className="text-sm text-bieli-muted mt-0.5">{user?.email}</p>
 
                 {user?.role?.name && (

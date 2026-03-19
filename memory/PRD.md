@@ -62,6 +62,13 @@ Construire un frontend e-commerce complet et moderne nommé "bieli.shop" avec Ne
 - Traduit les données mock de l'anglais vers le français
 - Corrigé l'hydratation Zustand (SSR + localStorage → state `mounted`)
 
+### 2026-03-19 — Session 2
+- **[x] Toasts sonner** : toast "Ajouté au panier !" sur ProductCard + page produit, avec nom du produit
+- **[x] Chat temps réel** : polling API toutes les 2.5s via `/api/messages` + `/api/messages/conversation/{id}`, envoi via `/api/messages/send`, optimistic update + rollback sur erreur, invite de connexion si non-authentifié
+- **[x] Page /account** : profil utilisateur, historique commandes depuis `/api/orders`, états loading/empty, bouton déconnexion, lien depuis l'icône User dans le header
+- Corrigé race condition auth sur /account (check `isLoading` avant redirect)
+- Corrigé email affiché deux fois dans le profil
+
 ## Backlog priorisé
 
 ### P0 — Critique
@@ -69,6 +76,9 @@ Construire un frontend e-commerce complet et moderne nommé "bieli.shop" avec Ne
 - [x] Login email/password fonctionnel (token stocké)
 - [x] Pages principales rendues correctement
 - [x] Panier fonctionnel (add/remove/update)
+- [x] Chat temps réel (polling)
+- [x] Page compte / historique commandes
+- [x] Notifications toast sonner
 
 ### P1 — Important
 - [ ] Ajouter des produits réels dans le backend Railway (catalog vide → fallback mock)
@@ -81,7 +91,5 @@ Construire un frontend e-commerce complet et moderne nommé "bieli.shop" avec Ne
 - [ ] Fonctionnalité "Favoris"
 
 ### Future (Backlog)
-- [ ] Chat en temps réel (WebSocket avec le backend)
 - [ ] Intégration paiement Stripe
-- [ ] Page compte utilisateur / historique commandes
-- [ ] Notifications toast (sonner) pour add to cart
+- [ ] Favoris / wishlist persistante
