@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #FAFAFA;
+  color: #111111;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: #D4AF37;
+  color: #fff;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
+
+/* Transitions globales */
+a, button { transition: all 0.2s ease; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease forwards;
+}
+
+/* Product card hover */
+.product-card-img {
+  transition: transform 0.5s ease;
+}
+.product-card:hover .product-card-img {
+  transform: scale(1.04);
+}
+
+/* Chat bubble */
+.chat-bubble-user {
+  background: #111111;
+  color: #fff;
+  border-radius: 18px 18px 4px 18px;
+}
+.chat-bubble-seller {
+  background: #F0EFED;
+  color: #111111;
+  border-radius: 18px 18px 18px 4px;
+}
