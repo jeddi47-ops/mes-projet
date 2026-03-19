@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ShoppingCart, Heart, ChevronRight, Plus, Minus, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ProductCard from '@/components/shop/ProductCard';
@@ -48,6 +49,7 @@ export default function ProductPage() {
   const handleAddToCart = () => {
     if (!product) return;
     addItem(product, qty, selectedOption || undefined);
+    toast.success('Ajouté au panier !', { description: product.name });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2500);
   };

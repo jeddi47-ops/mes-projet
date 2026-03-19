@@ -1,73 +1,145 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Send, MessageCircle, ArrowLeft, Circle } from 'lucide-react';
+import { Send, ArrowLeft, Circle, Lock } from 'lucide-react';
 import Header from '@/components/layout/Header';
+import { useAuthStore } from '@/lib/authStore';
+import api from '@/lib/api';
+import { Message } from '@/types';
 
-interface Message {
-  id: number;
-  sender: 'user' | 'seller';
-  text: string;
-  time: string;
-}
-
-const INITIAL_MESSAGES: Message[] = [
-  { id: 1, sender: 'seller', text: 'Bonjour ! Bienvenue chez bieli. Comment puis-je vous aider aujourd\'hui ?', time: '10:02' },
-  { id: 2, sender: 'user', text: 'Bonjour ! Je m\'intéresse aux casques sans fil. Sont-ils toujours disponibles ?', time: '10:05' },
-  { id: 3, sender: 'seller', text: 'Oui, absolument ! Nous avons les casques Wireless Noise-Cancelling en stock. Vous avez un excellent goût !', time: '10:06' },
-  { id: 4, sender: 'user', text: 'Super ! Y a-t-il des promotions en cours ?', time: '10:08' },
-  { id: 5, sender: 'seller', text: 'Oui ! Utilisez le code BIELI10 pour profiter de -10% sur votre première commande. La livraison est aussi gratuite dès 80€.', time: '10:09' },
-];
+const POLL_INTERVAL = 2500;
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const { isAuthenticated, user } = useAuthStore();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  useEffect(scrollToBottom, [messages]);
+  const scrollToBottom = () =>
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const now = new Date();
-    const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const userMsg: Message = { id: Date.now(), sender: 'user', text: input.trim(), time };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
-
-    // Auto-reply
-    setTimeout(() => {
-      const replies = [
-        'Merci pour votre message ! Je reviens vers vous dans quelques instants.',
-        'Bonne question ! Laissez-moi vérifier cela pour vous.',
-        'Bien sûr, je peux vous aider avec ça !',
-        'Avez-vous besoin d\'autres informations sur nos produits ?',
-      ];
-      const reply = replies[Math.floor(Math.random() * replies.length)];
-      const replyTime = `${now.getHours()}:${String(now.getMinutes() + 1).padStart(2, '0')}`;
-      setMessages((prev) => [...prev, { id: Date.now() + 1, sender: 'seller', text: reply, time: replyTime }]);
-    }, 1200);
+  const fetchMessages = async () => {
+    try {
+      const res = await api.get('/api/messages');
+      const data = Array.isArray(res.data) ? res.data : [];
+      setMessages(data);
+    } catch {
+      // Keep current state on error
+    }
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !isAuthenticated) return;
+    fetchMessages();
+    pollRef.current = setInterval(fetchMessages, POLL_INTERVAL);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [mounted, isAuthenticated]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || sending) return;
+    const text = input.trim();
+    setInput('');
+    setSending(true);
+
+    // Optimistic update
+    const tempMsg: Message = {
+      id: `temp-${Date.now()}`,
+      sender_id: user?.id || '',
+      receiver_id: null,
+      content: text,
+      is_read: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, tempMsg]);
+
+    try {
+      await api.post('/api/messages/send', { content: text, receiver_id: null });
+      await fetchMessages();
+    } catch {
+      // Keep optimistic message
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (!mounted) {
+    return (
+      <>
+        <Header />
+        <div className="pt-[56px] min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-bieli-border border-t-bieli-gold rounded-full animate-spin" />
+        </div>
+      </>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Header />
+        <main className="pt-[56px] min-h-screen flex items-center justify-center bg-bieli-bg">
+          <div className="text-center max-w-sm px-4" data-testid="chat-login-prompt">
+            <div className="w-16 h-16 border border-bieli-border rounded-full flex items-center justify-center mx-auto mb-6">
+              <Lock size={20} className="text-bieli-muted" />
+            </div>
+            <h2 className="font-playfair text-2xl font-medium mb-3">
+              Connectez-vous pour discuter
+            </h2>
+            <p className="text-sm text-bieli-gray mb-8">
+              Accédez à notre chat support en vous connectant à votre compte bieli.
+            </p>
+            <Link
+              href="/login"
+              data-testid="chat-login-link"
+              className="inline-block px-8 py-3 bg-bieli-black text-white text-sm hover:bg-bieli-gray transition-colors"
+            >
+              Se connecter
+            </Link>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
       <Header />
-      <main data-testid="chat-page" className="pt-[56px] h-screen flex flex-col bg-bieli-bg">
-        <div className="flex flex-1 max-w-5xl mx-auto w-full overflow-hidden border-x border-bieli-border bg-white" style={{ height: 'calc(100vh - 56px)' }}>
-
+      <main
+        data-testid="chat-page"
+        className="pt-[56px] flex flex-col bg-bieli-bg"
+        style={{ height: '100dvh' }}
+      >
+        <div
+          className="flex flex-1 max-w-5xl mx-auto w-full overflow-hidden border-x border-bieli-border bg-white"
+          style={{ height: 'calc(100dvh - 56px - 30px)' }}
+        >
           {/* Sidebar */}
           <div className="hidden md:flex w-72 flex-col border-r border-bieli-border flex-shrink-0">
             <div className="p-5 border-b border-bieli-border">
-              <Link href="/" className="inline-flex items-center gap-1 text-xs text-bieli-muted hover:text-bieli-black transition-colors mb-3">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1 text-xs text-bieli-muted hover:text-bieli-black transition-colors mb-3"
+              >
                 <ArrowLeft size={12} /> Retour à la boutique
               </Link>
               <h2 className="font-playfair text-xl font-medium">Messages</h2>
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              {/* Conversation item */}
               <div className="flex items-center gap-3 px-5 py-4 bg-bieli-soft border-l-2 border-bieli-gold cursor-pointer">
                 <div className="relative flex-shrink-0">
                   <div className="w-11 h-11 rounded-full bg-bieli-black flex items-center justify-center text-white font-playfair font-medium text-sm">
@@ -77,21 +149,24 @@ export default function ChatPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">Support bieli.</p>
-                  <p className="text-xs text-bieli-muted truncate">Disponible maintenant</p>
+                  <p className="text-xs text-bieli-muted truncate">
+                    {messages.length > 0 ? `${messages.length} message${messages.length > 1 ? 's' : ''}` : 'Disponible maintenant'}
+                  </p>
                 </div>
-                <span className="text-[10px] text-bieli-muted">10:09</span>
               </div>
             </div>
 
             <div className="p-4 border-t border-bieli-border">
-              <p className="text-xs text-bieli-muted text-center">Interface de chat bieli.</p>
+              <p className="text-xs text-bieli-muted text-center truncate">
+                Connecté : <span className="text-bieli-black">{user?.email}</span>
+              </p>
             </div>
           </div>
 
           {/* Chat area */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-h-0">
             {/* Chat header */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-bieli-border">
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-bieli-border flex-shrink-0">
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-bieli-black flex items-center justify-center text-white font-playfair font-medium">
                   B
@@ -104,38 +179,80 @@ export default function ChatPage() {
                   <Circle size={6} className="fill-green-500" /> En ligne
                 </p>
               </div>
-              <div className="ml-auto">
-                <Link href="/" className="md:hidden text-sm text-bieli-muted hover:text-bieli-black transition-colors flex items-center gap-1">
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-[10px] text-bieli-muted uppercase tracking-widest">
+                  Actualisé toutes les 2.5s
+                </span>
+                <Link
+                  href="/"
+                  className="md:hidden text-sm text-bieli-muted hover:text-bieli-black transition-colors flex items-center gap-1"
+                >
                   <ArrowLeft size={14} /> Boutique
                 </Link>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-5 py-6 space-y-4" data-testid="messages-area">
-              <p className="text-center text-xs text-bieli-muted uppercase tracking-widest">Aujourd'hui</p>
+            <div
+              className="flex-1 overflow-y-auto px-5 py-6 space-y-4"
+              data-testid="messages-area"
+            >
+              <p className="text-center text-xs text-bieli-muted uppercase tracking-widest">
+                Aujourd'hui
+              </p>
 
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  data-testid={`message-${msg.id}`}
-                  className={`flex items-end gap-2 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-                >
-                  {msg.sender === 'seller' && (
-                    <div className="w-8 h-8 rounded-full bg-bieli-black flex-shrink-0 flex items-center justify-center text-white text-xs font-playfair">
-                      B
-                    </div>
-                  )}
-                  <div className="max-w-xs md:max-w-sm">
-                    <div className={`px-4 py-2.5 text-sm leading-relaxed ${msg.sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-seller'}`}>
-                      {msg.text}
-                    </div>
-                    <p className={`text-[10px] text-bieli-muted mt-1 ${msg.sender === 'user' ? 'text-right' : ''}`}>
-                      {msg.time}
-                    </p>
-                  </div>
+              {messages.length === 0 && (
+                <div className="text-center py-10">
+                  <p className="text-sm text-bieli-gray font-medium mb-1">
+                    Commencez la conversation !
+                  </p>
+                  <p className="text-xs text-bieli-muted">
+                    Notre équipe vous répond dans les plus brefs délais.
+                  </p>
                 </div>
-              ))}
+              )}
+
+              {messages.map((msg) => {
+                const isOwn = msg.sender_id === user?.id;
+                const time = msg.created_at
+                  ? new Date(msg.created_at).toLocaleTimeString('fr-FR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : '';
+
+                return (
+                  <div
+                    key={msg.id}
+                    data-testid={`message-${msg.id}`}
+                    className={`flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}
+                  >
+                    {!isOwn && (
+                      <div className="w-8 h-8 rounded-full bg-bieli-black flex-shrink-0 flex items-center justify-center text-white text-xs font-playfair">
+                        B
+                      </div>
+                    )}
+                    <div className="max-w-xs md:max-w-sm">
+                      <div
+                        className={`px-4 py-2.5 text-sm leading-relaxed ${
+                          isOwn ? 'chat-bubble-user' : 'chat-bubble-seller'
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                      {time && (
+                        <p
+                          className={`text-[10px] text-bieli-muted mt-1 ${
+                            isOwn ? 'text-right' : ''
+                          }`}
+                        >
+                          {time}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
               <div ref={messagesEndRef} />
             </div>
 
@@ -143,7 +260,7 @@ export default function ChatPage() {
             <form
               onSubmit={sendMessage}
               data-testid="chat-form"
-              className="flex items-center gap-3 px-5 py-4 border-t border-bieli-border"
+              className="flex items-center gap-3 px-5 py-4 border-t border-bieli-border flex-shrink-0"
             >
               <input
                 type="text"
@@ -155,7 +272,7 @@ export default function ChatPage() {
               />
               <button
                 type="submit"
-                disabled={!input.trim()}
+                disabled={!input.trim() || sending}
                 data-testid="send-btn"
                 className="w-10 h-10 bg-bieli-black hover:bg-bieli-gray disabled:opacity-30 text-white flex items-center justify-center transition-colors flex-shrink-0"
               >

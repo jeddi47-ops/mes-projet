@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
+import { toast } from 'sonner';
 import { Product } from '@/types';
 import { useCartStore } from '@/lib/cartStore';
 import { StarRating } from './StarRating';
@@ -65,7 +66,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="flex gap-2">
           <button
             data-testid={`add-to-cart-${product.id}`}
-            onClick={() => addItem(product)}
+            onClick={() => {
+              addItem(product);
+              toast.success('Ajouté au panier !', { description: product.name });
+            }}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-bieli-black text-bieli-black text-xs font-medium hover:bg-bieli-black hover:text-white transition-colors"
           >
             <ShoppingCart size={13} />

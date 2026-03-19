@@ -51,3 +51,32 @@ export interface AuthResponse {
   access_token: string;
   token_type?: string;
 }
+
+export interface Order {
+  id: string;
+  user_id?: string;
+  status: 'pending_payment' | 'payment_discussion' | 'paid' | 'cancelled';
+  total_amount: number;
+  shipping_address?: unknown;
+  payment_method?: string;
+  items?: OrderItem[];
+  created_at?: string;
+}
+
+export interface OrderItem {
+  id: string;
+  product_id?: string;
+  quantity: number;
+  unit_price: number;
+  product_name?: string;
+}
+
+export interface Message {
+  id: string;
+  sender_id: string;
+  receiver_id?: string | null;
+  content: string;
+  is_read: boolean;
+  sender_name?: string | null;
+  created_at?: string;
+}

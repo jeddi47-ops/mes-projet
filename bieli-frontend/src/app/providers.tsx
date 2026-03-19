@@ -1,5 +1,6 @@
 'use client';
 import { useEffect } from 'react';
+import { Toaster } from 'sonner';
 import { useAuthStore } from '@/lib/authStore';
 import api from '@/lib/api';
 
@@ -24,5 +25,17 @@ function AuthInit({ children }: { children: React.ReactNode }) {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  return <AuthInit>{children}</AuthInit>;
+  return (
+    <AuthInit>
+      {children}
+      <Toaster
+        position="bottom-right"
+        richColors
+        theme="light"
+        toastOptions={{
+          style: { fontFamily: 'var(--font-dm-sans)', borderRadius: '0px' },
+        }}
+      />
+    </AuthInit>
+  );
 }

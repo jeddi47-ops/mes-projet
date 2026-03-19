@@ -82,14 +82,23 @@ export default function Header() {
             </Link>
 
             {isAuthenticated ? (
-              <button
-                data-testid="logout-btn"
-                onClick={() => { logout(); router.push('/login'); }}
-                className="hidden md:flex items-center gap-1.5 text-sm px-4 py-1.5 border border-bieli-border hover:border-bieli-black transition-colors rounded-full"
-              >
-                <User size={14} />
-                Déconnexion
-              </button>
+              <div className="hidden md:flex items-center gap-1">
+                <Link
+                  href="/account"
+                  data-testid="account-btn"
+                  className="p-2 hover:text-bieli-gold transition-colors"
+                  aria-label="Mon compte"
+                >
+                  <User size={18} />
+                </Link>
+                <button
+                  data-testid="logout-btn"
+                  onClick={() => { logout(); router.push('/login'); }}
+                  className="flex items-center gap-1.5 text-sm px-4 py-1.5 border border-bieli-border hover:border-bieli-black transition-colors rounded-full"
+                >
+                  Déconnexion
+                </button>
+              </div>
             ) : (
               <Link
                 href="/login"
