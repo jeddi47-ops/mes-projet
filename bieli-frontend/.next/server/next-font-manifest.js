@@ -1,0 +1,1 @@
+self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/app/bieli-frontend/src/app/layout\":[\"static/media/13971731025ec697-s.p.woff2\",\"static/media/eaead17c7dbfcd5d-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"

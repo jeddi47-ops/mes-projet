@@ -6,7 +6,7 @@ import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/authStore';
 import api from '@/lib/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   const handleGoogle = () => {
-    window.location.href = `${API_URL}/api/auth/google`;
+    window.location.href = `${BACKEND_URL}/api/auth/google/login`;
   };
 
   return (
