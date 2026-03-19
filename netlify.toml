@@ -1,0 +1,7 @@
+[build]
+  base    = "bieli-frontend"
+  command = "yarn install && yarn build"
+  publish = "bieli-frontend/.next"
+
+[build.environment]
+  NODE_VERSION = "20"
