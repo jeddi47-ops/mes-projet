@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, ShoppingBag, User, Menu, X, Heart } from 'lucide-react';
+import { Search, ShoppingBag, User, Menu, X } from 'lucide-react';
 import { useCartStore } from '@/lib/cartStore';
 import { useAuthStore } from '@/lib/authStore';
 
@@ -11,11 +11,13 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const cartCount = useCartStore((s) => s.count());
   const { isAuthenticated, logout } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
@@ -72,7 +74,7 @@ export default function Header() {
 
             <Link href="/cart" data-testid="cart-btn" className="relative p-2 hover:text-bieli-gold transition-colors">
               <ShoppingBag size={18} />
-              {cartCount > 0 && (
+              {mounted && cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-bieli-gold text-white text-[10px] rounded-full flex items-center justify-center font-medium">
                   {cartCount}
                 </span>

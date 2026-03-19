@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Minus, Plus, X, Tag } from 'lucide-react';
 import Header from '@/components/layout/Header';
@@ -8,9 +8,12 @@ import { useCartStore } from '@/lib/cartStore';
 
 export default function CartPage() {
   const { items, removeItem, updateQty, total, clearCart } = useCartStore();
+  const [mounted, setMounted] = useState(false);
   const [coupon, setCoupon] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState('');
+
+  useEffect(() => { setMounted(true); }, []);
 
   const applyCoupon = () => {
     if (coupon.toUpperCase() === 'BIELI10') {
@@ -21,9 +24,10 @@ export default function CartPage() {
     }
   };
 
-  const subtotal = total();
+  const subtotal = mounted ? total() : 0;
   const discount = couponApplied ? subtotal * 0.1 : 0;
   const finalTotal = subtotal - discount;
+  const cartItems = mounted ? items : [];
 
   return (
     <>
@@ -38,14 +42,14 @@ export default function CartPage() {
               </Link>
               <h1 className="font-playfair text-4xl font-medium">Mon panier</h1>
             </div>
-            {items.length > 0 && (
+            {cartItems.length > 0 && (
               <button onClick={clearCart} className="text-xs text-bieli-muted hover:text-red-500 transition-colors uppercase tracking-widest">
                 Vider le panier
               </button>
             )}
           </div>
 
-          {items.length === 0 ? (
+          {cartItems.length === 0 ? (
             <div className="text-center py-24" data-testid="empty-cart">
               <p className="font-playfair text-3xl text-bieli-black mb-2">Votre panier est vide.</p>
               <p className="text-bieli-gray text-sm mb-8">Découvrez notre sélection de produits.</p>
@@ -65,7 +69,7 @@ export default function CartPage() {
                   <span className="text-right">Total</span>
                 </div>
 
-                {items.map((item) => {
+                {cartItems.map((item) => {
                   const imageUrl = item.product.images?.[0]?.url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200';
                   return (
                     <div
