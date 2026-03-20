@@ -1,6 +1,6 @@
 [build]
-  base    = "bieli-frontend"
-  command = "yarn install && yarn build"
+  base = "bieli-frontend"
+  command = "npm install && npm run build"
   publish = ".next"
 
 [build.environment]
@@ -10,4 +10,3 @@
 # Sans ce plugin, Netlify sert .next comme dossier statique → 404
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
