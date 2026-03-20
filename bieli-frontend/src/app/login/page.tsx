@@ -6,7 +6,9 @@ import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/authStore';
 import api from '@/lib/api';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  'https://mes-projet-production.up.railway.app';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,16 +23,25 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    const payload = { email, password };
+    console.log('[bieli] Login attempt →', { email, endpoint: '/api/auth/login' });
+
     try {
-      const res = await api.post('/api/auth/login', { email, password });
+      const res = await api.post('/api/auth/login', payload);
       const token = res.data.access_token;
+      console.log('[bieli] Login success - token:', token.slice(0, 20) + '...');
+
       const me = await api.get('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('[bieli] /api/auth/me →', me.data);
+
       setAuth(token, me.data);
       router.push('/');
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { detail?: string } } };
+      const e = err as { response?: { data?: { detail?: string }; status?: number } };
+      console.error('[bieli] Login error →', e?.response?.status, e?.response?.data);
       setError(e?.response?.data?.detail || 'Email ou mot de passe incorrect.');
     } finally {
       setLoading(false);
@@ -38,7 +49,9 @@ export default function LoginPage() {
   };
 
   const handleGoogle = () => {
-    window.location.href = `${BACKEND_URL}/api/auth/google/login`;
+    const url = `${BACKEND_URL}/api/auth/google/login`;
+    console.log('[bieli] Google OAuth redirect →', url);
+    window.location.href = url;
   };
 
   return (

@@ -9,13 +9,19 @@ function AuthInit({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('bieli_token');
+    console.log('[bieli] AuthInit — token présent:', !!token);
+
     if (!token) {
       setLoading(false);
       return;
     }
     api.get('/api/auth/me')
-      .then((res) => setAuth(token, res.data))
-      .catch(() => {
+      .then((res) => {
+        console.log('[bieli] AuthInit — /api/auth/me OK:', res.data?.email);
+        setAuth(token, res.data);
+      })
+      .catch((err) => {
+        console.error('[bieli] AuthInit — /api/auth/me FAILED:', err.response?.status);
         localStorage.removeItem('bieli_token');
         setLoading(false);
       });
