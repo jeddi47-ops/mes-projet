@@ -45,10 +45,10 @@ export default function ProductPage() {
     }
 
     // Real UUID: call the live API
-    api.get(`/api/products/${id}`)
+    api.get(`/products/${id}`)
       .then((res) => {
         setProduct(res.data);
-        return api.get('/api/catalog', { params: { per_page: 4, category: res.data.category } });
+        return api.get('/catalog', { params: { per_page: 4, category: res.data.category } });
       })
       .then((res) => {
         const items = res.data?.items ?? res.data ?? [];

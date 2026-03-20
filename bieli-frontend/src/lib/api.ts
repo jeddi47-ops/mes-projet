@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Always use relative URLs → proxied by Next.js API route to Railway
+// baseURL '/api' → all calls go through the Next.js proxy → Railway (no CORS)
 const api = axios.create({
-  baseURL: '',
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });

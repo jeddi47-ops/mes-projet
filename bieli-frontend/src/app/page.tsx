@@ -17,7 +17,7 @@ export default function HomePage() {
   const [category, setCategory] = useState('All');
 
   useEffect(() => {
-    api.get('/api/catalog', { params: { per_page: 20 } })
+    api.get('/catalog', { params: { per_page: 20 } })
       .then((res) => {
         const items = res.data?.items ?? res.data ?? [];
         setProducts(items.length > 0 ? items : MOCK_PRODUCTS);

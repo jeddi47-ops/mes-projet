@@ -15,7 +15,7 @@ function CallbackContent() {
       router.replace('/login');
       return;
     }
-    api.get('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+    api.get('/auth/me', { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         setAuth(token, res.data);
         router.replace('/');

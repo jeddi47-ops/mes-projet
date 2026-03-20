@@ -15,13 +15,13 @@ function AuthInit({ children }: { children: React.ReactNode }) {
       setLoading(false);
       return;
     }
-    api.get('/api/auth/me')
+    api.get('/auth/me')
       .then((res) => {
-        console.log('[bieli] AuthInit — /api/auth/me OK:', res.data?.email);
+        console.log('[bieli] AuthInit — /auth/me OK:', res.data?.email);
         setAuth(token, res.data);
       })
       .catch((err) => {
-        console.error('[bieli] AuthInit — /api/auth/me FAILED:', err.response?.status);
+        console.error('[bieli] AuthInit — /auth/me FAILED:', err.response?.status);
         localStorage.removeItem('bieli_token');
         setLoading(false);
       });

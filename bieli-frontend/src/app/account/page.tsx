@@ -40,7 +40,7 @@ export default function AccountPage() {
       router.replace('/login');
       return;
     }
-    api.get('/api/orders')
+    api.get('/orders')
       .then((res) => setOrders(Array.isArray(res.data) ? res.data : []))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));

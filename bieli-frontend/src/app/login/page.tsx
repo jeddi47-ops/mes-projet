@@ -24,11 +24,11 @@ export default function LoginPage() {
     console.log('[bieli] Login attempt →', { email, endpoint: '/api/auth/login' });
 
     try {
-      const res = await api.post('/api/auth/login', payload);
+      const res = await api.post('/auth/login', payload);
       const token = res.data.access_token;
       console.log('[bieli] Login success - token:', token.slice(0, 20) + '...');
 
-      const me = await api.get('/api/auth/me', {
+      const me = await api.get('/auth/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('[bieli] /api/auth/me →', me.data);
