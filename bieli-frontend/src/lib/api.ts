@@ -1,12 +1,8 @@
 import axios from 'axios';
 
-// Empty string → relative URLs → proxied by Netlify/Next.js rewrites to Railway
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
-
-console.log('[bieli] API init — baseURL:', API_URL || '(relative, proxied)');
-
+// Always use relative URLs → proxied by Next.js API route to Railway
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: '',
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });

@@ -6,10 +6,6 @@ import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/authStore';
 import api from '@/lib/api';
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://mes-projet-production.up.railway.app';
-
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
@@ -49,9 +45,7 @@ export default function LoginPage() {
   };
 
   const handleGoogle = () => {
-    const url = `${BACKEND_URL}/api/auth/google/login`;
-    console.log('[bieli] Google OAuth redirect →', url);
-    window.location.href = url;
+    window.location.href = '/api/auth/google/login';
   };
 
   return (
