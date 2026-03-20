@@ -1,12 +1,11 @@
 [build]
   base    = "bieli-frontend"
   command = "yarn install && yarn build"
-  publish = "bieli-frontend/.next"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
 
-# Proxy /api/* → Railway backend (évite les erreurs CORS)
 [[redirects]]
   from   = "/api/*"
   to     = "https://mes-projet-production.up.railway.app/api/:splat"
