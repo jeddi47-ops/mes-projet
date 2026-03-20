@@ -45,7 +45,7 @@ export default function LoginPage() {
   };
 
   const handleGoogle = () => {
-    window.location.href = '/api/auth/google/login';
+    window.location.href = '/api/auth/google';
   };
 
   return (
