@@ -1,0 +1,14 @@
+# Next.js build output — never commit, Netlify rebuilds from source
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Env files
+.env.local
+.env*.local
+
+# Misc
+.DS_Store
+*.pem

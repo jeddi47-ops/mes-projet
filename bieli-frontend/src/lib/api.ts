@@ -1,17 +1,18 @@
 import axios from 'axios';
 
-// Empty string → relative URLs → proxied by Netlify/Next.js rewrites to Railway
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
-
-console.log('[bieli] API init — baseURL:', API_URL || '(relative, proxied)');
-
+// FIXED: hardcoded '/api' — never reads env vars, never calls Railway directly
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 });
 
-// ── Request interceptor: attach token + log ──────────────────────────────────
+// Confirm baseURL at startup — must always print exactly "/api"
+if (typeof window !== 'undefined') {
+  console.log('[bieli] Axios baseURL:', api.defaults.baseURL);
+}
+
+// ── Request interceptor: attach token ────────────────────────────────────────
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('bieli_token');
@@ -19,21 +20,14 @@ api.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
-  console.log(`[bieli] → ${config.method?.toUpperCase()} ${config.baseURL ?? ''}${config.url}`);
   return config;
 });
 
-// ── Response interceptor: log + handle 401 ──────────────────────────────────
+// ── Response interceptor: handle 401 ─────────────────────────────────────────
 api.interceptors.response.use(
-  (res) => {
-    console.log(`[bieli] ← ${res.status} ${res.config.url}`);
-    return res;
-  },
+  (res) => res,
   (err) => {
     const status = err.response?.status;
-    const url = err.config?.url;
-    console.error(`[bieli] ✗ ${status ?? 'NETWORK'} ${url}`, err.response?.data ?? err.message);
-
     if (status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('bieli_token');
     }

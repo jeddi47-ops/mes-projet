@@ -5,16 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  NEXT_PUBLIC_API_URL = "https://mes-projet-production.up.railway.app"
 
 # Plugin Next.js — transforme .next en serverless functions Netlify
 # Sans ce plugin, Netlify sert .next comme dossier statique → 404
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Proxy /api/* → Railway backend (évite CORS)
-[[redirects]]
-  from = "/api/*"
-  to = "https://mes-projet-production.up.railway.app/api/:splat"
-  status = 200
-  force = true

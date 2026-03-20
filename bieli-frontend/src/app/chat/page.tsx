@@ -35,7 +35,7 @@ export default function ChatPage() {
   const poll = async () => {
     try {
       // Step 1: Get conversations list
-      const convRes = await api.get<Conversation[]>('/api/messages');
+      const convRes = await api.get<Conversation[]>('/messages');
       const convList = Array.isArray(convRes.data) ? convRes.data : [];
 
       if (convList.length > 0) {
@@ -44,7 +44,7 @@ export default function ChatPage() {
         setPartnerName(conv.user_name || 'Support bieli.');
 
         // Step 2: Get actual messages for this conversation
-        const msgRes = await api.get<Message[]>(`/api/messages/conversation/${conv.user_id}`);
+        const msgRes = await api.get<Message[]>(`/messages/conversation/${conv.user_id}`);
         const msgs = Array.isArray(msgRes.data) ? msgRes.data : [];
         setMessages(msgs);
       }
@@ -86,7 +86,7 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, tempMsg]);
 
     try {
-      await api.post('/api/messages/send', { content: text, receiver_id: null });
+      await api.post('/messages/send', { content: text, receiver_id: null });
       await poll(); // Refresh to get real message
     } catch (err: unknown) {
       // Rollback optimistic

@@ -22,9 +22,9 @@ export default function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      const res = await api.post('/api/auth/register', form);
+      const res = await api.post('/auth/register', form);
       const token = res.data.access_token;
-      const me = await api.get('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+      const me = await api.get('/auth/me', { headers: { Authorization: `Bearer ${token}` } });
       setAuth(token, me.data);
       router.push('/');
     } catch (err: unknown) {

@@ -6,10 +6,6 @@ import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/authStore';
 import api from '@/lib/api';
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://mes-projet-production.up.railway.app';
-
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
@@ -28,11 +24,11 @@ export default function LoginPage() {
     console.log('[bieli] Login attempt →', { email, endpoint: '/api/auth/login' });
 
     try {
-      const res = await api.post('/api/auth/login', payload);
+      const res = await api.post('/auth/login', payload);
       const token = res.data.access_token;
       console.log('[bieli] Login success - token:', token.slice(0, 20) + '...');
 
-      const me = await api.get('/api/auth/me', {
+      const me = await api.get('/auth/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('[bieli] /api/auth/me →', me.data);
@@ -49,9 +45,7 @@ export default function LoginPage() {
   };
 
   const handleGoogle = () => {
-    const url = `${BACKEND_URL}/api/auth/google/login`;
-    console.log('[bieli] Google OAuth redirect →', url);
-    window.location.href = url;
+    window.location.href = '/api/auth/google';
   };
 
   return (
