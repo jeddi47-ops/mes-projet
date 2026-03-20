@@ -1,1 +1,1 @@
-{"/_not-found/page":"/_not-found","/account/page":"/account","/cart/page":"/cart","/chat/page":"/chat","/login/page":"/login","/page":"/","/product/[id]/page":"/product/[id]","/register/page":"/register","/auth/callback/page":"/auth/callback"}
+{"/_not-found/page":"/_not-found","/account/page":"/account","/auth/callback/page":"/auth/callback","/chat/page":"/chat","/cart/page":"/cart","/login/page":"/login","/page":"/","/product/[id]/page":"/product/[id]","/register/page":"/register"}
