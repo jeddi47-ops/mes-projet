@@ -23,7 +23,16 @@ async function proxy(
     method: request.method,
     headers,
     body: body || undefined,
+    redirect: 'manual',
   });
+
+  // Forward HTTP redirects (e.g. Google OAuth 302) directly to the browser
+  if (res.status >= 300 && res.status < 400) {
+    const location = res.headers.get('location');
+    if (location) {
+      return NextResponse.redirect(location, { status: res.status });
+    }
+  }
 
   const data = await res.text();
   return new NextResponse(data, {

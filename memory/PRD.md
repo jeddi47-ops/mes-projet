@@ -79,11 +79,12 @@ Construire un frontend e-commerce complet et moderne nommé "bieli.shop" avec Ne
 - [x] Chat temps réel (polling)
 - [x] Page compte / historique commandes
 - [x] Notifications toast sonner
+- [x] Proxy Next.js API Route `/api/[...path]` — suppression conflits Netlify redirects + rewrites
 
 ### P1 — Important
 - [ ] Ajouter des produits réels dans le backend Railway (catalog vide → fallback mock)
 - [ ] Vérifier le flow complet Google OAuth en environnement déployé
-- [ ] Tester le déploiement en production (Vercel/Railway)
+- [ ] Tester le déploiement en production Netlify après fix proxy
 
 ### P2 — Souhaitable
 - [ ] Revue fidélité design vs images de référence fournies
