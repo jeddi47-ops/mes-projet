@@ -22,7 +22,7 @@ export default function ChatPage() {
   const { isAuthenticated, user } = useAuthStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [partnerId, setPartnerId] = useState<string | null>(null);
-  const [partnerName, setPartnerName] = useState('Support bieli.');
+  const [partnerName, setPartnerName] = useState('Support nel.store');
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -41,7 +41,7 @@ export default function ChatPage() {
       if (convList.length > 0) {
         const conv = convList[0];
         setPartnerId(conv.user_id);
-        setPartnerName(conv.user_name || 'Support bieli.');
+        setPartnerName(conv.user_name || 'Support nel.store');
 
         // Step 2: Get actual messages for this conversation
         const msgRes = await api.get<Message[]>(`/messages/conversation/${conv.user_id}`);
@@ -129,7 +129,7 @@ export default function ChatPage() {
               Connectez-vous pour discuter
             </h2>
             <p className="text-sm text-bieli-gray mb-8">
-              Accédez à notre chat support en vous connectant à votre compte bieli.
+              Accédez à notre chat support en vous connectant à votre compte nel.store.
             </p>
             <Link
               href="/login"
@@ -177,7 +177,7 @@ export default function ChatPage() {
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate">Support bieli.</p>
+                  <p className="text-sm font-medium truncate">Support nel.store</p>
                   <p className="text-xs text-bieli-muted truncate">
                     {messages.length > 0
                       ? `${messages.length} message${messages.length > 1 ? 's' : ''}`

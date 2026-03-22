@@ -59,7 +59,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 text-center">
           <Link href="/" className="font-playfair text-5xl font-medium text-white mb-6 block">
-            bieli.
+            <img src="/nelstore-logo.jpg" alt="nel.store" className="h-16 w-auto mx-auto" />
           </Link>
           <p className="text-white/40 text-sm tracking-[0.2em] uppercase mb-12">Curated Shop</p>
 
@@ -91,13 +91,13 @@ export default function LoginPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-white p-8 md:p-16">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
-          <Link href="/" className="lg:hidden font-playfair text-3xl font-semibold text-bieli-black block mb-10">
-            bieli.
+          <Link href="/" className="lg:hidden block mb-10">
+            <img src="/nelstore-logo.jpg" alt="nel.store" className="h-10 w-auto" />
           </Link>
 
           <p className="text-xs tracking-widest uppercase text-bieli-muted mb-2">Bienvenue</p>
           <h1 className="font-playfair text-3xl font-medium text-bieli-black mb-1">Se connecter</h1>
-          <p className="text-sm text-bieli-gray mb-8">Connectez-vous à votre compte bieli.</p>
+          <p className="text-sm text-bieli-gray mb-8">Connectez-vous à votre compte nel.store.</p>
 
           {/* Social buttons */}
           <div className="space-y-3 mb-6">

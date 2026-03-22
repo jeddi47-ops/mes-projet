@@ -44,8 +44,8 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" data-testid="header-logo" className="font-playfair text-2xl font-semibold tracking-tight text-bieli-black">
-            bieli.
+          <Link href="/" data-testid="header-logo" className="flex items-center">
+            <img src="/nelstore-logo.jpg" alt="nel.store" className="h-8 w-auto" />
           </Link>
 
           {/* Nav — desktop */}

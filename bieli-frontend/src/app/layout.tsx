@@ -18,9 +18,9 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'bieli. — Curated Shop',
+  title: 'nel.store — Curated Shop',
   description: 'Curated products for the discerning customer.',
-  keywords: 'shop, premium, curated, bieli',
+  keywords: 'shop, premium, curated, nel.store',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
