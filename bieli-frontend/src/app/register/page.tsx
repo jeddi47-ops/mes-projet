@@ -42,7 +42,9 @@ export default function RegisterPage() {
         <div className="absolute top-[-80px] right-[-80px] w-[300px] h-[300px] rounded-full border border-white/5" />
         <div className="absolute bottom-[-60px] left-[-60px] w-[240px] h-[240px] rounded-full border border-bieli-gold/10" />
         <div className="relative z-10 text-center">
-          <Link href="/" className="font-playfair text-5xl font-medium text-white mb-4 block">bieli.</Link>
+          <Link href="/" className="mb-4 block">
+            <img src="/nelstore-logo.jpg" alt="nel.store" className="h-16 w-auto mx-auto" />
+          </Link>
           <p className="text-white/40 text-sm tracking-[0.2em] uppercase mb-12">Rejoignez-nous</p>
           <p className="text-white/60 text-sm max-w-xs leading-relaxed">
             Créez votre compte pour profiter d'offres exclusives, suivre vos commandes et accéder à notre collection complète.
@@ -53,11 +55,13 @@ export default function RegisterPage() {
       {/* Right form panel */}
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-white p-8 md:p-16">
         <div className="w-full max-w-sm">
-          <Link href="/" className="lg:hidden font-playfair text-3xl font-semibold block mb-10">bieli.</Link>
+          <Link href="/" className="lg:hidden block mb-10">
+            <img src="/nelstore-logo.jpg" alt="nel.store" className="h-10 w-auto" />
+          </Link>
 
           <p className="text-xs tracking-widest uppercase text-bieli-muted mb-2">Nouveau compte</p>
           <h1 className="font-playfair text-3xl font-medium mb-1">Créer un compte</h1>
-          <p className="text-sm text-bieli-gray mb-8">Rejoignez la communauté bieli.</p>
+          <p className="text-sm text-bieli-gray mb-8">Rejoignez la communauté nel.store.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (

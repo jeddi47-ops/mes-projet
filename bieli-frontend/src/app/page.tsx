@@ -46,7 +46,7 @@ export default function HomePage() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pb-16 w-full animate-fade-up">
             <p className="text-xs text-white/60 tracking-[0.3em] uppercase mb-3">Nouvelle collection 2025</p>
             <h1 className="font-playfair text-6xl md:text-8xl font-medium text-white leading-none mb-6">
-              bieli.<br />
+              nel.store<br />
               <span className="text-bieli-gold">Curated.</span>
             </h1>
             <div className="flex flex-wrap gap-3">

@@ -37,8 +37,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Brand */}
         <div className="col-span-1 md:col-span-2">
-          <Link href="/" className="font-playfair text-3xl font-semibold text-white">
-            bieli.
+          <Link href="/" className="inline-flex items-center">
+            <img src="/nelstore-logo.jpg" alt="nel.store" className="h-10 w-auto" />
           </Link>
           <p className="text-white/40 text-sm mt-3 max-w-xs leading-relaxed">
             Une sélection de produits pensée pour ceux qui exigent le meilleur. Qualité, design, durabilité.
@@ -79,7 +79,7 @@ export default function Footer() {
       {/* Bottom */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-white/30">© {new Date().getFullYear()} bieli.shop — Tous droits réservés.</p>
+          <p className="text-xs text-white/30">© {new Date().getFullYear()} nel.store — Tous droits réservés.</p>
           <div className="flex gap-4 text-xs text-white/30">
             <a href="#" className="hover:text-white transition-colors">Politique de confidentialité</a>
             <a href="#" className="hover:text-white transition-colors">CGV</a>
